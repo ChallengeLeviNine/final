@@ -24,25 +24,86 @@ def get_sort_key(position, player):
     else:
         return 0, 0
 
+def position_dict(sorted_players):
+    result = []
+    for key in sorted_players:
+        if(key == "PG"):
+            iterations = min(len(sorted_players[key]), 3)
+            pg = { 'pointGuards': [] }
+            for i in range(iterations):
+                pg['pointGuards'].append([
+                        {
+                            "playerName": sorted_players[key][i]["playerName"],
+                            "gamesPlayed": sorted_players[key][i]["gamesPlayed"],
+                            "hollingerAssistRatio": sorted_players[key][i]["advanced"]["hollingerAssistRatio"],
+                            "effectiveFieldGoalPercentage": sorted_players[key][i]["advanced"]["effectiveFieldGoalPercentage"]
+                        }
+                    ])
+            result.append(pg)
+        elif(key == "SG"):
+            iterations = min(len(sorted_players[key]), 3)
+            sg = { 'shootingGuards': [] }
+            for i in range(iterations):
+                sg['shootingGuards'].append([
+                        {
+                            "playerName": sorted_players[key][i]["playerName"],
+                            "gamesPlayed": sorted_players[key][i]["gamesPlayed"],
+                            "trueShootingPercentage": sorted_players[key][i]["advanced"]["trueShootingPercentage"],
+                            "averageThreePointsPercentage": sorted_players[key][i]["traditional"]["threePoints"]["shootingPercentage"]
+                        }
+                    ])
+            result.append(sg)
+        elif(key == "SF"):
+            iterations = min(len(sorted_players[key]), 3)
+            sf = { 'smallForwards': [] }
+            for i in range(iterations):
+                sf['smallForwards'].append([
+                        {
+                            "playerName": sorted_players[key][i]["playerName"],
+                            "gamesPlayed": sorted_players[key][i]["gamesPlayed"],
+                            "trueShootingPercentage": sorted_players[key][i]["advanced"]["trueShootingPercentage"],
+                            "rebounds": sorted_players[key][i]["traditional"]["rebounds"]
+                        }
+                    ])
+            result.append(sf)
+        elif(key == "PF"):
+            iterations = min(len(sorted_players[key]), 3)
+            pf = { 'powerForwards': [] }
+            for i in range(iterations):
+                pf['powerForwards'].append([
+                        {
+                            "playerName": sorted_players[key][i]["playerName"],
+                            "gamesPlayed": sorted_players[key][i]["gamesPlayed"],
+                            "trueShootingPercentage": sorted_players[key][i]["advanced"]["trueShootingPercentage"],
+                            "rebounds": sorted_players[key][i]["traditional"]["rebounds"]
+                        }
+                    ])
+            result.append(pf)
 
-def extract_position_data(players, position):
-    return [
-        {
-            "playerName": player["playerName"],
-            "gamesPlayed": player["gamesPlayed"],
-            **player["traditional"],
-            **player["advanced"]
-        }
-        for player in players[position]
-    ]
-
+        if(key == "C"):
+            iterations = min(len(sorted_players[key]), 3)
+            c = { 'centers': [] }
+            for i in range(iterations):
+                c['centers'].append([
+                        {
+                            "playerName": sorted_players[key][i]["playerName"],
+                            "gamesPlayed": sorted_players[key][i]["gamesPlayed"],
+                            "rebounds": sorted_players[key][i]["traditional"]["rebounds"],
+                            "blocks": sorted_players[key][i]["traditional"]["blocks"]
+                        }
+                    ])
+            result.append(c)
+    return result
 
 def sort_players_by_position(players_data):
     categorized_players = {}
 
     for player in players_data:
         position = player["position"]
-        categorized_players.setdefault(position, []).append(player)
+        if position in categorized_players:
+            categorized_players[position].append(player)
+        else:
+            categorized_players[position] = [player]
 
     sorted_players = {}
 
@@ -55,15 +116,11 @@ def sort_players_by_position(players_data):
                 key=lambda x: (x["gamesPlayed"], x["playerName"])
             )
 
-    return sorted_players
+    return position_dict(sorted_players)
 
 
 def get_candidates_for_national_team(data):
     first_filter = filter_players_by_games_played(data)
     sorted_players = sort_players_by_position(first_filter)
 
-    result = {}
-    for position in sorted_players:
-        result[position] = extract_position_data(sorted_players, position)
-
-    return result
+    return sorted_players
