@@ -42,11 +42,35 @@ Resources:
       Architectures:
         - x86_64
       Events:
-        HelloWorld:
+        PlayerStatsFunction:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /hello
+            Path: /stats/player/{playerFullName}
             Method: get
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: player-stats-l9
+
+
+  FileStorageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: player-files-l9
+
+
+  PlayerStatsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+        TableName: player-stats-l9
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
             
   ApplicationResourceGroup:
