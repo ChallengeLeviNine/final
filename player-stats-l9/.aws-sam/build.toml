@@ -19,4 +19,13 @@ manifest_hash = ""
 packagetype = "Zip"
 functions = ["PlayerStatsFunction"]
 
+[function_build_definitions.0c1a4dcc-c2fc-403c-8b6d-b0d817c44f8f]
+codeuri = "C:\\Users\\darko\\Desktop\\final\\player-stats-l9\\nationalTeam"
+runtime = "python3.9"
+architecture = "x86_64"
+handler = "app.national_team"
+manifest_hash = ""
+packagetype = "Zip"
+functions = ["NationalTeamFunction"]
+
 [layer_build_definitions]

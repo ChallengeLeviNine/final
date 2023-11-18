@@ -3,6 +3,7 @@ import boto3
 import csv
 from io import StringIO
 from decimal import Decimal
+import math
 
 s3 = boto3.client('s3')
 dynamodb = boto3.resource('dynamodb')
@@ -46,8 +47,11 @@ def load_data(file):
         
         data.append(row)
 
-
-def load_all_data(data):
+def round_half_up(n, decimals=0):
+    multiplier = 10**decimals
+    return math.floor(n * multiplier + 0.5) / multiplier
+# calculating statistics for API endpoint
+def loadAllData(data):
     players = []
     #going through csv data, calcuating simple stats
     for player_stats in data:
@@ -69,10 +73,10 @@ def load_all_data(data):
                 players[i]['traditional']['steals'] += int(player_stats[11])
                 players[i]['traditional']['turnovers'] += int(player_stats[12])
                 #calculating advanced stats
-                players[i]['other']['val'].append(round((int(player_stats[2])+2*int(player_stats[4])+3*int(player_stats[6])+int(player_stats[8])+int(player_stats[9])+int(player_stats[10])+int(player_stats[11]))-(int(player_stats[3])-int(player_stats[2])+int(player_stats[5])-int(player_stats[4])+int(player_stats[7])-int(player_stats[6])+int(player_stats[12])),2))
-                players[i]['other']['efg'].append(round((int(player_stats[4])+int(player_stats[6])+0.5*int(player_stats[6]))/(int(player_stats[5])+int(player_stats[7]))*100 if (int(player_stats[5])+int(player_stats[7])) > 0 else 0,2))
-                players[i]['other']['shp'].append(round((int(player_stats[2])+2*int(player_stats[4])+3*int(player_stats[6]))/(2*(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])))*100 if (2*(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3]))) > 0 else 0,2))
-                players[i]['other']['har'].append(round(int(player_stats[10])/(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])+int(player_stats[10])+int(player_stats[12]))*100 if (int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])+int(player_stats[10])+int(player_stats[12])) > 0 else 0,2))
+                players[i]['other']['val'].append((int(player_stats[2])+2*int(player_stats[4])+3*int(player_stats[6])+int(player_stats[8])+int(player_stats[9])+int(player_stats[10])+int(player_stats[11]))-(int(player_stats[3])-int(player_stats[2])+int(player_stats[5])-int(player_stats[4])+int(player_stats[7])-int(player_stats[6])+int(player_stats[12])))
+                players[i]['other']['efg'].append((int(player_stats[4])+int(player_stats[6])+0.5*int(player_stats[6]))/(int(player_stats[5])+int(player_stats[7]))*100 if (int(player_stats[5])+int(player_stats[7])) > 0 else 0)
+                players[i]['other']['shp'].append((int(player_stats[2])+2*int(player_stats[4])+3*int(player_stats[6]))/(2*(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])))*100 if (2*(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3]))) > 0 else 0)
+                players[i]['other']['har'].append(int(player_stats[10])/(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])+int(player_stats[10])+int(player_stats[12]))*100 if (int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])+int(player_stats[10])+int(player_stats[12])) > 0 else 0)
         
         if(playerExist == False):
             dict = {
@@ -103,16 +107,16 @@ def load_all_data(data):
                 'turnovers' : int(player_stats[12]),
                 },
                 'advanced' : {
-                    'valorization' : 0,
-                    'effectiveFieldGoalPercentage' : 0,
-                    'trueShootingPercentage' : 0,
-                    'hollingerAssistRatio' : 0
+                    'valorization' : None,
+                    'effectiveFieldGoalPercentage' : None,
+                    'trueShootingPercentage' : None,
+                    'hollingerAssistRatio' : None
                 },
                 'other' : {
-                    'val' : [round((int(player_stats[2])+2*int(player_stats[4])+3*int(player_stats[6])+int(player_stats[8])+int(player_stats[9])+int(player_stats[10])+int(player_stats[11]))-(int(player_stats[3])-int(player_stats[2])+int(player_stats[5])-int(player_stats[4])+int(player_stats[7])-int(player_stats[6])+int(player_stats[12])),2)],
-                    'efg' : [round((int(player_stats[4])+int(player_stats[6])+0.5*int(player_stats[6]))/(int(player_stats[5])+int(player_stats[7]))*100 if (int(player_stats[5])+int(player_stats[7])) > 0 else 0,2)],
-                    'shp' : [round((int(player_stats[2])+2*int(player_stats[4])+3*int(player_stats[6]))/(2*(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])))*100 if (2*(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3]))) > 0 else 0,2)],
-                    'har' : [round(int(player_stats[10])/(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])+int(player_stats[10])+int(player_stats[12]))*100 if (int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])+int(player_stats[10])+int(player_stats[12])) > 0 else 0,2)]
+                    'val' : [((int(player_stats[2])+2*int(player_stats[4])+3*int(player_stats[6])+int(player_stats[8])+int(player_stats[9])+int(player_stats[10])+int(player_stats[11]))-(int(player_stats[3])-int(player_stats[2])+int(player_stats[5])-int(player_stats[4])+int(player_stats[7])-int(player_stats[6])+int(player_stats[12])))],
+                    'efg' : [(int(player_stats[4])+int(player_stats[6])+0.5*int(player_stats[6]))/(int(player_stats[5])+int(player_stats[7]))*100 if (int(player_stats[5])+int(player_stats[7])) > 0 else 0],
+                    'shp' : [(int(player_stats[2])+2*int(player_stats[4])+3*int(player_stats[6]))/(2*(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])))*100 if (2*(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3]))) > 0 else 0],
+                    'har' : [int(player_stats[10])/(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])+int(player_stats[10])+int(player_stats[12]))*100 if (int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])+int(player_stats[10])+int(player_stats[12])) > 0 else 0]
                 },
 
             }
@@ -120,29 +124,48 @@ def load_all_data(data):
 
     #format response
     for i, player in enumerate(players):
-        players[i]['traditional']['freeThrows']['made'] = round(players[i]['traditional']['freeThrows']['made']/players[i]['gamesPlayed'], 1)
-        players[i]['traditional']['freeThrows']['attempts'] = round(players[i]['traditional']['freeThrows']['attempts']/players[i]['gamesPlayed'], 1)
-        players[i]['traditional']['freeThrows']['shootingPercentage'] = round(players[i]['traditional']['freeThrows']['made']/players[i]['traditional']['freeThrows']['attempts']*100 if (players[i]['traditional']['freeThrows']['attempts']) > 0 else 0, 1)
+        playedGames = players[i]['gamesPlayed']
 
-        players[i]['traditional']['twoPoints']['made'] = round(players[i]['traditional']['twoPoints']['made']/players[i]['gamesPlayed'], 1)
-        players[i]['traditional']['twoPoints']['attempts'] = round(players[i]['traditional']['twoPoints']['attempts']/players[i]['gamesPlayed'], 1)
-        players[i]['traditional']['twoPoints']['shootingPercentage'] = round(players[i]['traditional']['twoPoints']['made']/players[i]['traditional']['twoPoints']['attempts']*100 if (players[i]['traditional']['twoPoints']['attempts']) > 0 else 0, 1)
-
-        players[i]['traditional']['threePoints']['made'] = round(players[i]['traditional']['threePoints']['made']/players[i]['gamesPlayed'], 1)
-        players[i]['traditional']['threePoints']['attempts'] = round(players[i]['traditional']['threePoints']['attempts']/players[i]['gamesPlayed'], 1)
-        players[i]['traditional']['threePoints']['shootingPercentage'] = round(players[i]['traditional']['threePoints']['made']/players[i]['traditional']['threePoints']['attempts']*100 if (players[i]['traditional']['threePoints']['attempts']) > 0 else 0, 1)
-
-        players[i]['traditional']['points'] = round((players[i]['traditional']['freeThrows']['made']+2*players[i]['traditional']['twoPoints']['made']+3*players[i]['traditional']['threePoints']['made'])/players[i]['gamesPlayed'] if (players[i]['gamesPlayed']) > 0 else 0, 1)
-        players[i]['traditional']['rebounds'] = round(players[i]['traditional']['rebounds']/players[i]['gamesPlayed'] if (players[i]['gamesPlayed']) > 0 else 0,1)
-        players[i]['traditional']['blocks'] = round(players[i]['traditional']['blocks']/players[i]['gamesPlayed'] if (players[i]['gamesPlayed']) > 0 else 0,1)
-        players[i]['traditional']['assists'] = round(players[i]['traditional']['assists']/players[i]['gamesPlayed'] if (players[i]['gamesPlayed']) > 0 else 0,1)
-        players[i]['traditional']['steals'] = round(players[i]['traditional']['steals']/players[i]['gamesPlayed'] if (players[i]['gamesPlayed']) > 0 else 0,1)
-        players[i]['traditional']['turnovers'] = round(players[i]['traditional']['turnovers']/players[i]['gamesPlayed'] if (players[i]['gamesPlayed']) > 0 else 0,1)
+        ftm = players[i]['traditional']['freeThrows']['made']
+        fta = players[i]['traditional']['freeThrows']['attempts']
+        players[i]['traditional']['freeThrows']['made'] = round_half_up(ftm/playedGames, 1)
+        players[i]['traditional']['freeThrows']['attempts'] = round_half_up(fta/playedGames, 1)
+        players[i]['traditional']['freeThrows']['shootingPercentage'] = round_half_up(ftm/fta*100 if fta > 0 else 0, 1)
         
-        players[i]['advanced']['valorization'] = round(sum(players[i]['other']['val'])/players[i]['gamesPlayed'] if (players[i]['gamesPlayed']) > 0 else 0,1)
-        players[i]['advanced']['effectiveFieldGoalPercentage'] = round(sum(players[i]['other']['efg'])/players[i]['gamesPlayed'] if (players[i]['gamesPlayed']) > 0 else 0,1)
-        players[i]['advanced']['trueShootingPercentage'] = round(sum(players[i]['other']['shp'])/players[i]['gamesPlayed'] if (players[i]['gamesPlayed']) > 0 else 0,1)
-        players[i]['advanced']['hollingerAssistRatio'] = round(sum(players[i]['other']['har'])/players[i]['gamesPlayed'] if (players[i]['gamesPlayed']) > 0 else 0,1)
-        players[i].pop("other")
+        pm2 = players[i]['traditional']['twoPoints']['made']
+        pa2 = players[i]['traditional']['twoPoints']['attempts']
+        players[i]['traditional']['twoPoints']['made'] = round_half_up(pm2/playedGames, 1)
+        players[i]['traditional']['twoPoints']['attempts'] = round_half_up(pa2/playedGames, 1)
+        players[i]['traditional']['twoPoints']['shootingPercentage'] = round_half_up(pm2/pa2*100 if pa2 > 0 else 0, 1)
+
+        pm3 = players[i]['traditional']['threePoints']['made']
+        pa3 = players[i]['traditional']['threePoints']['attempts']
+        players[i]['traditional']['threePoints']['made'] = round_half_up(pm3/playedGames, 1)
+        players[i]['traditional']['threePoints']['attempts'] = round_half_up(pa3/playedGames, 1)
+        players[i]['traditional']['threePoints']['shootingPercentage'] = round_half_up(pm3/pa3*100 if pa3 > 0 else 0, 1)
+
+        points = (ftm/playedGames+2*pm2/playedGames+3*pm3/playedGames)
+        players[i]['traditional']['points'] = round_half_up(points, 1)
+        reb = players[i]['traditional']['rebounds']
+        blk = players[i]['traditional']['blocks']
+        ass = players[i]['traditional']['assists']
+        stl = players[i]['traditional']['steals']
+        trn = players[i]['traditional']['turnovers']
+        players[i]['traditional']['rebounds'] = round_half_up(reb/playedGames if (playedGames) > 0 else 0,1)
+        players[i]['traditional']['blocks'] = round_half_up(blk/playedGames if (playedGames) > 0 else 0,1)
+        players[i]['traditional']['assists'] = round_half_up(ass/playedGames if (playedGames) > 0 else 0,1)
+        players[i]['traditional']['steals'] = round_half_up(stl/playedGames if (playedGames) > 0 else 0,1)
+        players[i]['traditional']['turnovers'] = round_half_up(trn/playedGames if (playedGames) > 0 else 0,1)
+        
+        players[i]['advanced']['valorization'] = round_half_up((points + reb/playedGames + blk/playedGames + ass/playedGames + stl/playedGames) - (fta/playedGames - ftm/playedGames + pa2/playedGames - pm2/playedGames + pa3/playedGames - pm3/playedGames + trn/playedGames),1)
+        players[i]['advanced']['effectiveFieldGoalPercentage'] = round_half_up((pm2/playedGames + 1.5 * pm3/playedGames) / (pa2/playedGames + pa3/playedGames) * 100 if (pa2/playedGames + pa3/playedGames) > 0 else 0, 1)
+        attempts_ratio = pa2/playedGames + pa3/playedGames + 0.475 * fta/playedGames
+        players[i]['advanced']['trueShootingPercentage'] = round_half_up(points / (2 * attempts_ratio) * 100 if (2 * attempts_ratio) > 0 else 0,1)
+
+        har = ((ass/playedGames)/(pa2/playedGames+pa3/playedGames + 0.475*(fta/playedGames)+ass/playedGames+trn/playedGames)*100 if (pa2/playedGames+pa3/playedGames + 0.475*(fta/playedGames)+ass/playedGames+trn/playedGames) > 0 else 0)
+        players[i]['advanced']['hollingerAssistRatio'] = round_half_up(har,1)
+    
+
+        players[i].pop('other')
 
     return players

@@ -6,7 +6,7 @@ import urllib.parse
 class DecimalEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, Decimal):
-            return str(o)
+            return float(o)
         return super(DecimalEncoder, self).default(o)
 
 def player_stats(event, context):
