@@ -17,7 +17,7 @@ def procces_data(event, context):
     file = s3.get_object(Bucket='player-files-l9', Key='L9HackathonPlayersInput.csv')
 
     load_data(file)
-    players = load_all_data(data)
+    players = loadAllData(data)
     for player in players:
         player = json.loads(json.dumps(player), parse_float=Decimal)
         table.put_item(Item=player)
