@@ -49,7 +49,7 @@ Resources:
             Method: get
       Policies:
         - DynamoDBReadPolicy:
-            TableName: ...
+            TableName: player-stats-l9
 
 
   FileStorageBucket:
