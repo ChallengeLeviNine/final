@@ -84,7 +84,7 @@ def loadAllData(data):
 
         players[i]['traditional']['threePoints']['made'] = round(players[i]['traditional']['threePoints']['made']/players[i]['gamesPlayed'], 1)
         players[i]['traditional']['threePoints']['attempts'] = round(players[i]['traditional']['threePoints']['attempts']/players[i]['gamesPlayed'], 1)
-        players[i]['traditional']['freeThrows']['shootingPercentage'] = round(players[i]['traditional']['threePoints']['made']/players[i]['traditional']['threePoints']['attempts']*100 if (players[i]['traditional']['threePoints']['attempts']) > 0 else 0, 1)
+        players[i]['traditional']['threePoints']['shootingPercentage'] = round(players[i]['traditional']['threePoints']['made']/players[i]['traditional']['threePoints']['attempts']*100 if (players[i]['traditional']['threePoints']['attempts']) > 0 else 0, 1)
 
         players[i]['traditional']['points'] = round((players[i]['traditional']['freeThrows']['made']+2*players[i]['traditional']['twoPoints']['made']+3*players[i]['traditional']['threePoints']['made'])/players[i]['gamesPlayed'] if (players[i]['gamesPlayed']) > 0 else 0, 1)
         players[i]['traditional']['rebounds'] = round(players[i]['traditional']['rebounds']/players[i]['gamesPlayed'] if (players[i]['gamesPlayed']) > 0 else 0,1)
@@ -98,4 +98,5 @@ def loadAllData(data):
         players[i]['advanced']['trueShootingPercentage'] = round(sum(players[i]['other']['shp'])/players[i]['gamesPlayed'] if (players[i]['gamesPlayed']) > 0 else 0,1)
         players[i]['advanced']['hollingerAssistRatio'] = round(sum(players[i]['other']['har'])/players[i]['gamesPlayed'] if (players[i]['gamesPlayed']) > 0 else 0,1)
     
+        players[i].pop('other')
     return players
