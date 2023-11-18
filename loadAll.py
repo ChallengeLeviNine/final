@@ -24,9 +24,9 @@ def loadAllData(data):
                 players[i]['traditional']['turnovers'] += int(player_stats[12])
                 #calculating advanced stats
                 players[i]['other']['val'].append(round((int(player_stats[2])+2*int(player_stats[4])+3*int(player_stats[6])+int(player_stats[8])+int(player_stats[9])+int(player_stats[10])+int(player_stats[11]))-(int(player_stats[3])-int(player_stats[2])+int(player_stats[5])-int(player_stats[4])+int(player_stats[7])-int(player_stats[6])+int(player_stats[12])),2))
-                players[i]['other']['efg'].append(round((int(player_stats[4])+int(player_stats[6])+0.5*int(player_stats[6]))/(int(player_stats[5])+int(player_stats[7]))*100,2))
-                players[i]['other']['shp'].append(round((int(player_stats[2])+2*int(player_stats[4])+3*int(player_stats[6]))/(2*(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])))*100,2))
-                players[i]['other']['har'].append(round(int(player_stats[10])/(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])+int(player_stats[10])+int(player_stats[12]))*100,2))
+                players[i]['other']['efg'].append(round((int(player_stats[4])+int(player_stats[6])+0.5*int(player_stats[6]))/(int(player_stats[5])+int(player_stats[7]))*100 if (int(player_stats[5])+int(player_stats[7])) > 0 else 0,2))
+                players[i]['other']['shp'].append(round((int(player_stats[2])+2*int(player_stats[4])+3*int(player_stats[6]))/(2*(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])))*100 if (2*(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3]))) > 0 else 0,2))
+                players[i]['other']['har'].append(round(int(player_stats[10])/(int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])+int(player_stats[10])+int(player_stats[12]))*100 if (int(player_stats[5])+int(player_stats[7])+0.475*int(player_stats[3])+int(player_stats[10])+int(player_stats[12])) > 0 else 0,2))
         
         if(playerExist == False):
             dict = {
