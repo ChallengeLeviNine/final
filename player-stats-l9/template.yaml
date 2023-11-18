@@ -56,6 +56,24 @@ Resources:
         - DynamoDBReadPolicy:
             TableName: player-stats-l9
 
+  NationalTeamFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: nationalTeam/
+      Handler: app.national_team
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+      Events:
+        PlayerStatsFunction:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /stats/national-team-candidates
+            Method: get
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: player-stats-l9
+
   FileStorageBucket:
     Type: AWS::S3::Bucket
     Properties:
